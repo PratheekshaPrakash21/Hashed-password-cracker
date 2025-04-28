@@ -1,0 +1,58 @@
+import streamlit as st
+import hashlib
+import time
+
+# Path to rockyou wordlist (this will be used automatically in the backend)
+WORDLIST_PATH = "C:/Users/Shrilee Sinha/Desktop/rockyou.txt"
+
+# Function to crack the hash using the wordlist
+def crack_hash(target_hash, hash_type):
+    try:
+        with open(WORDLIST_PATH, 'r', encoding='latin-1') as wordlist:
+            for word in wordlist:
+                word = word.strip()  # remove any extra spaces/newlines
+                hashed_word = hashlib.new(hash_type, word.encode('utf-8')).hexdigest()
+                
+                if hashed_word == target_hash:
+                    return word
+        return None  # return None if no match found
+    except Exception as e:
+        st.error(f"Error: {e}")
+        return None
+
+# Streamlit Frontend
+def main():
+    # Set up the Streamlit app layout
+    st.title("Hashed File Cracker")
+    st.write("Enter the hash you want to crack and select the hash type.")
+    
+    # User Input: Hash to crack
+    target_hash = st.text_input("Enter the hash:")
+    
+    # User Input: Select hash type (MD5, SHA1, SHA256)
+    hash_type = st.selectbox("Select hash type", ("md5", "sha1", "sha256", "sha512"))
+    
+    # Crack button
+    if st.button("Start Cracking"):
+        if target_hash and hash_type:
+            # Start cracking the hash
+            st.write("Cracking the hash, please wait...")
+            
+            # Timer to simulate cracking time
+            start_time = time.time()
+            result = crack_hash(target_hash, hash_type)
+            end_time = time.time()
+            
+            # Display result
+            if result:
+                st.success(f"Hash cracked! The original word is: `{result}`")
+            else:
+                st.error("Failed to crack the hash. Try a different hash or wordlist.")
+            
+            # Show the time taken
+            st.write(f"Time taken: {end_time - start_time:.2f} seconds")
+        else:
+            st.error("Please enter a valid hash and select a hash type.")
+
+if __name__ == "__main__":
+    main()
